@@ -14,6 +14,7 @@ set "verde_=[92m"
 set "vermelho_=[91m"
 set "amarelo_=[93m"
 set "azul_=[94m"
+set "cinza=[90m"
 
 ::=========================================================================================================================
 :Menu
@@ -40,7 +41,7 @@ echo:                       [%cor%%azul_%5%cor%%branco%] Habilitar WebView2
 echo:
 echo:                       [%cor%%vermelho%0%cor%%branco%] SAIR
 echo:                       ______________________________
-echo:
+echo:                                                                %cor%%cinza%1.0.2%cor%%branco%
 echo:       ______________________________________________________________
 
 choice /C:123450 /N
@@ -226,6 +227,15 @@ echo %cor%%amarelo_%Parando servico Winmgmt...%cor%%branco%
 powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
 powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
 powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
+sc query Winmgmt | find /i "STOPPED" >nul && (
+    echo %cor%%verde_%[Sucesso]%cor%%branco%
+) || (
+    echo %cor%%vermelho%[Falha]%cor%%branco%
+    echo:
+    echo %cor%%vermelho_%Recomendado reiniciar o PC e tentar novamente.%cor%%branco%
+    sc config Winmgmt start= auto >nul 2>&1
+    goto :eof
+)
 
 echo:
 echo %cor%%amarelo_%Deletando repositorio WMI...%cor%%branco%
