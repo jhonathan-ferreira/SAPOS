@@ -226,25 +226,6 @@ echo %cor%%amarelo_%Parando servico Winmgmt...%cor%%branco%
 powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
 powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
 powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
-sc query Winmgmt | find /i "STOPPED" >nul && (
-    echo %cor%%verde_%[Sucesso]%cor%%branco%
-) || (
-    echo %cor%%vermelho_%[Falha]%cor%%branco%
-    echo:
-    echo %cor%%azul_%Recomendado reiniciar e tentar novamente.%cor%%branco%
-    echo:
-    echo %cor%%amarelo_%Deseja reiniciar agora? (S/N)%cor%%branco%
-    choice /C:SN /N
-    if !errorlevel!==1 (
-        sc config Winmgmt start= auto >nul 2>&1
-        echo Reiniciando em 10 segundos...
-        timeout /t 10
-        shutdown -t 5 -r
-        exit
-    )
-    sc config Winmgmt start= auto >nul 2>&1
-    goto :eof
-)
 
 echo:
 echo %cor%%amarelo_%Deletando repositorio WMI...%cor%%branco%
