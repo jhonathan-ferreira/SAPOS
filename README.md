@@ -3,7 +3,7 @@
 **SAPOS** é uma ferramenta em script que centraliza utilitários para auxiliar na manutenção do POS e seus componentes no Windows.  
 Através de um menu interativo, permite executar correções comuns de forma prática, rápida e segura.
 
-## 🚀 Funcionalidades
+## 𓆏 Funcionalidades 𓆏
 
 Atualmente, o SAPOS oferece as seguintes opções:
 
@@ -17,7 +17,7 @@ Realiza testes de comunicação com os endpoints do POS, portas locais e outras 
 Verifica se o WMI (Windows Management Instrumentation) está corrompido e, caso esteja, tenta realizar reparos.
 
 ### 4. ATUALIZAR DLL SAT
-Copia o arquivo .dll (e outros arquivos se necessário) da pasta do software do fabricante para as pastas necessárias para o funcionamento com o POS, substituindo os arquivos antigos. Atualmente suporta 3 modelos: Bematech SAT GO, Elgin Smart e Elgin Linker II.
+Copia o arquivo .dll (e outros arquivos se necessário) da pasta do software do fabricante para as pastas necessárias para o funcionamento com o POS, substituindo os arquivos antigos. Atualmente suporta os modelos: Bematech SAT GO, Elgin Smart, Elgin Linker II e Dimep D-SAT.
 
 ### 5. HABILITAR WEBVIEW2
 Muda o valor do registro do WebView2 para considerar como um programa e constar na listagem de Programas e Recursos do painel de controle, sendo possível realizar o reparo quando necessário.
