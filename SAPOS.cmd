@@ -41,7 +41,7 @@ echo:                       [%cor%%azul_%5%cor%%branco%] Habilitar WebView2
 echo:
 echo:                       [%cor%%vermelho%0%cor%%branco%] SAIR
 echo:                       ______________________________
-echo:                                                                %cor%%cinza%1.0.2%cor%%branco%
+echo:                                                                %cor%%cinza%1.0.3%cor%%branco%
 echo:       ______________________________________________________________
 
 choice /C:123450 /N
@@ -532,19 +532,21 @@ echo:
 echo:                       [%cor%%azul_%1%cor%%branco%] Bematech SAT-GO
 echo:                       [%cor%%azul_%2%cor%%branco%] Elgin Smart
 echo:                       [%cor%%azul_%3%cor%%branco%] Elgin Linker II
+echo:                       [%cor%%azul_%4%cor%%branco%] Dimep D-SAT
 echo:
 echo:                       [%cor%%vermelho%0%cor%%branco%] VOLTAR
 echo:                       ______________________________
 echo:
 echo:       ______________________________________________________________
 
-choice /C:1230 /N
+choice /C:12340 /N
 set _erl=%errorlevel%
 
 if %_erl%==1 setlocal & call :dllSATGO & endlocal
 if %_erl%==2 setlocal & call :dllSMART & endlocal
 if %_erl%==3 setlocal & call :dllLINKERII  & endlocal
-if %_erl%==4 goto Menu
+if %_erl%==4 setlocal & call :dllDIMEP  & endlocal
+if %_erl%==5 goto Menu
 
 ::========================================================================================================================
 ::========================================================================================================================
@@ -699,6 +701,66 @@ copy /Y "%dllsat.dll%" "%FFlinker%"
 del "%FFlinker%\sat_elgin.dll"
 
 ren "%FFlinker%\dllsat.dll" sat_elgin.dll
+
+powershell -command ^
+    "Stop-Service -Name 'Fiscal Flow Client' -Force"
+powershell -command ^
+    "Start-Service -Name 'Fiscal Flow Client'"
+
+powershell -command "if ((Get-Service -Name 'Fiscal Flow Client').Status -ne 'Running') { exit 1 }" >nul 2>&1
+if !errorlevel! neq 0 (
+    echo %cor%%amarelo%DLL atualizada, porem o servico Fiscal Flow Client nao foi iniciado corretamente
+    echo Tente iniciar o servico manualmente%cor%%branco%
+    call :voltar_menu
+)
+echo %cor%%verde_%DLL atualizada.%cor%%branco%
+call :voltar_menu
+
+::========================================================================================================================
+::========================================================================================================================
+:dllDIMEP
+echo %cor%%azul%ATUALIZAR DLL SAT%cor%%branco%
+echo Este procedimento substitui o arquivo .dll para o aparelho SAT.
+echo %cor%%amarelo_%Deseja continuar? (S/N)%cor%%branco%
+choice /C:SN /N
+set confirmacao_teste=%errorlevel%
+if %confirmacao_teste%==2 (
+    echo:
+    echo Operacao cancelada pelo usuario.
+    goto :eof
+)
+cls
+setlocal enabledelayedexpansion
+
+set "satdimep.dll=%USERPROFILE%\AppData\Local\Programs\dsat-dm\satdimep.dll"
+set "satdimep.ini=%USERPROFILE%\AppData\Local\Programs\dsat-dm\satdimep.ini"
+set "SysWOW64=C:\Windows\SysWOW64"
+set "System32=C:\Windows\System32"
+set "FFdimep=C:\Program Files (x86)\Linx\Fiscal Flow Client\DLLSAT\DIMEP_D-SAT"
+
+if not exist "%satdimep.dll%" (
+    echo %cor%%vermelho%DLL nao encontrada.%cor%%branco%
+    echo Verifique se o D-SAT Device Manager esta instalado na pasta:
+    echo %USERPROFILE%\AppData\Local\Programs\dsat-dm
+    call :voltar_menu
+)
+
+if not exist "%FFdimep%" (
+    echo %cor%%vermelho%Pasta DIMEP_D-SAT nao encontrada.%cor%%branco%
+    echo Verifique se o Fiscal Flow Client esta instalado corretamente
+    call :voltar_menu
+)
+
+copy /Y "%satdimep.dll%" "%SysWOW64%"
+copy /Y "%satdimep.ini%" "%SysWOW64%"
+copy /Y "%satdimep.dll%" "%System32%"
+copy /Y "%satdimep.ini%" "%System32%"
+copy /Y "%satdimep.dll%" "%FFdimep%"
+copy /Y "%satdimep.ini%" "%FFdimep%"
+
+del "%FFdimep%\sat_dimep.dll"
+
+ren "%FFdimep%\satdimep.dll" sat_dimep.dll
 
 powershell -command ^
     "Stop-Service -Name 'Fiscal Flow Client' -Force"
