@@ -41,7 +41,7 @@ echo:                       [%cor%%azul_%5%cor%%branco%] Habilitar WebView2
 echo:
 echo:                       [%cor%%vermelho%0%cor%%branco%] SAIR
 echo:                       ______________________________
-echo:                                                                %cor%%cinza%1.0.3%cor%%branco%
+echo:                                                                %cor%%cinza%1.0.4%cor%%branco%
 echo:       ______________________________________________________________
 
 choice /C:123450 /N
@@ -181,14 +181,14 @@ if %confirmacao_fixwmi%==2 (
 
 cls
 echo %cor%%amarelo_%Verificando WMI...%cor%%branco%
-call :checkwmi_sapos
+call :checkwmi
 
 :: Aplicar correção básica primeiro
 if defined error_wmi (
     echo %cor%%amarelo_%Parando servico Winmgmt...%cor%%branco%
     powershell -Command "Stop-Service Winmgmt -Force" >nul 2>&1
     winmgmt /salvagerepository >nul 2>&1
-    call :checkwmi_sapos
+    call :checkwmi
 )
 
 if not defined error_wmi (
@@ -255,7 +255,7 @@ if %errorlevel% EQU 0 (
     echo %cor%%vermelho_%[Falha]%cor%%branco%
 )
 
-call :checkwmi_sapos
+call :checkwmi
 if not defined error_wmi (
     echo:
     echo %cor%%amarelo_%Verificando WMI...%cor%%branco%
@@ -269,7 +269,7 @@ call :registerobj_sapos
 
 echo:
 echo %cor%%amarelo_%Verificacao final do WMI...%cor%%branco%
-call :checkwmi_sapos
+call :checkwmi
 if defined error_wmi (
     echo %cor%%vermelho_%[Nao Respondendo]%cor%%branco%
     echo:
@@ -302,13 +302,22 @@ winmgmt /resetrepository >nul 2>&1
 goto :eof
 
 
-:checkwmi_sapos
+:checkwmi
 set error_wmi=
 powershell -Command "try { Get-WmiObject -Class Win32_ComputerSystem | Select-Object -Property CreationClassName | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
-if %errorlevel% NEQ 0 (set error_wmi=1& goto :eof)
+if %errorlevel% NEQ 0 ( set error_wmi=1 & goto :eof)
 
 winmgmt /verifyrepository >nul 2>&1
-if %errorlevel% NEQ 0 (set error_wmi=1& goto :eof)
+if %errorlevel% NEQ 0 ( set error_wmi=1 & goto :eof)
+
+powershell -Command "try { Get-WmiObject -Namespace 'root\cimv2' -Class __Namespace | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+if %errorlevel% NEQ 0 ( set error_wmi=1 & goto :eof)
+
+powershell -Command "try { Get-WmiObject -Class __Win32Provider -Namespace root\cimv2 | Where-Object {$_.Name -eq 'CIMWin32'} | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+if %errorlevel% NEQ 0 ( set error_wmi=1 & goto :eof)
+
+powershell -Command "try { $classes = @('Win32_OperatingSystem', 'Win32_LogicalDisk', 'Win32_NetworkAdapter', 'Win32_Service', 'Win32_SystemDevices'); foreach($class in $classes) { $result = Get-WmiObject -Class $class -ErrorAction Stop | Select-Object -First 1 }; exit 0 } catch { exit 1 }" >nul 2>&1
+if %errorlevel% NEQ 0 ( set error_wmi=1 & goto :eof)
 
 powershell -Command "try { $null=([WMISEARCHER]'SELECT * FROM SoftwareLicensingService').Get().Version; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% NEQ 0 set error_wmi=1
